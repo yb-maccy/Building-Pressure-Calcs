@@ -635,7 +635,10 @@
                 if (runningPRVLimit !== Infinity) {
                     const sourceFloor = sortedFloors.find(f => f.name === activePrvFloorName);
                     let elevationDroppingFromPrvSource = sourceFloor ? (getDecimalFeet(sourceFloor) - getDecimalFeet(current)) : 0;
-                    let cascadedMaxAllowedPressure = runningPRVLimit + (elevationDroppingFromPrvSource * PSI_PER_FOOT);
+                    
+                    // Deduct the linear friction loss incurred moving between the PRV and the current floor
+                    let frictionDroppedFromPrvSource = elevationDroppingFromPrvSource * domFrictionFactor;
+                    let cascadedMaxAllowedPressure = runningPRVLimit + (elevationDroppingFromPrvSource * PSI_PER_FOOT) - frictionDroppedFromPrvSource;
                     
                     if (current.rawDom > cascadedMaxAllowedPressure) {
                         current.postDom = cascadedMaxAllowedPressure;
