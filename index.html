@@ -189,6 +189,32 @@
             border-radius: 6px;
             border: 1px dashed var(--border);
             margin-top: 8px;
+            margin-bottom: 14px;
+        }
+
+        .pump-calc-block {
+            padding: 14px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+        }
+        .pump-calc-block.fire-block {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+        .pump-calc-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .pump-calc-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0,0,0,0.06);
         }
     </style>
 </head>
@@ -210,7 +236,7 @@
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                     <div class="form-group">
-                        <label for="street-pressure">Street Main Pressure (psi)</label>
+                        <label for="street-pressure">Street Main Residual Pressure (psi)</label>
                         <input type="number" id="street-pressure" value="50" step="0.1" onchange="calculate()">
                     </div>
                 </div>
@@ -220,7 +246,7 @@
                 <div class="card-header-flex">
                     <h2 class="card-title domestic-title">Domestic Water Controls</h2>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div class="form-group">
                         <label for="dom-bfp">Backflow Preventer Loss (psi)</label>
                         <input type="number" id="dom-bfp" value="10" step="0.1" onchange="calculate()">
@@ -230,12 +256,12 @@
                         <input type="number" id="dom-misc" value="0" step="0.1" onchange="calculate()">
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
-                        <label for="dom-pump">Booster Pump Gain (psi)</label>
+                        <label for="dom-pump">Booster Pump Current Gain (psi)</label>
                         <input type="number" id="dom-pump" value="50" step="0.1" onchange="calculate()">
                     </div>
                 </div>
                 
-                <label style="margin-top:12px; font-weight:600; display:block;">Riser Friction Settings</label>
+                <label style="font-weight:600; display:block;">Riser Friction Settings</label>
                 <div class="friction-flex">
                     <div>
                         <label style="font-size:0.75rem;">Material</label>
@@ -252,7 +278,7 @@
                             <option value="1.5">1-1/2"</option>
                             <option value="2">2"</option>
                             <option value="2.5">2-1/2"</option>
-                            <option value="3"  selected>3"</option>
+                            <option value="3" selected>3"</option>
                             <option value="4">4"</option>
                             <option value="5">5"</option>
                             <option value="6">6"</option>
@@ -266,13 +292,28 @@
                         <input type="number" id="dom-flow" value="125" step="1" onchange="calculate()">
                     </div>
                 </div>
+
+                <div class="pump-calc-block">
+                    <div class="pump-calc-title" style="color: #15803d;">Booster Pump Pressure Sizer</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
+                        <div class="form-group">
+                            <label for="dom-req-top" style="color: #166534;">Required Target (psi)</label>
+                            <input type="number" id="dom-req-top" value="30" step="1" onchange="calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label for="dom-target-floor" style="color: #166534;">Target Floor Constraint</label>
+                            <select id="dom-target-floor" onchange="calculate()"></select>
+                        </div>
+                    </div>
+                    <div class="pump-calc-value" id="dom-required-boost" style="color: #16a34a;">0.0 psi</div>
+                </div>
             </div>
 
             <div class="card">
                 <div class="card-header-flex">
                     <h2 class="card-title fire-title">Fire Water Controls</h2>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div class="form-group">
                         <label for="fire-bfp">Backflow Preventer Loss (psi)</label>
                         <input type="number" id="fire-bfp" value="12" step="0.1" onchange="calculate()">
@@ -282,7 +323,7 @@
                         <input type="number" id="fire-misc" value="0" step="0.1" onchange="calculate()">
                     </div>
                     <div class="form-group">
-                        <label for="fire-pump">Fire Pump Boost (psi)</label>
+                        <label for="fire-pump">Fire Pump Current Boost (psi)</label>
                         <input type="number" id="fire-pump" value="150" step="0.1" onchange="calculate()">
                     </div>
                     <div class="form-group">
@@ -291,13 +332,13 @@
                     </div>
                 </div>
 
-                <label style="margin-top:12px; font-weight:600; display:block;">Riser Friction Settings</label>
+                <label style="font-weight:600; display:block;">Riser Friction Settings</label>
                 <div class="friction-flex">
                     <div>
                         <label style="font-size:0.75rem;">Material</label>
                         <select id="fire-material" onchange="calculate()">
                             <option value="none">None</option>
-                            <option value="sch10"  selected>Sch 10 Steel</option>
+                            <option value="sch10" selected>Sch 10 Steel</option>
                             <option value="sch40">Sch 40 Steel</option>
                         </select>
                     </div>
@@ -307,7 +348,7 @@
                             <option value="2">2"</option>
                             <option value="2.5">2-1/2"</option>
                             <option value="3">3"</option>
-                            <option value="4"  selected>4"</option>
+                            <option value="4" selected>4"</option>
                             <option value="5">5"</option>
                             <option value="6">6"</option>
                             <option value="8">8"</option>
@@ -319,6 +360,21 @@
                         <label style="font-size:0.75rem;">Design Flow (GPM)</label>
                         <input type="number" id="fire-flow" value="500" step="1" onchange="calculate()">
                     </div>
+                </div>
+
+                <div class="pump-calc-block fire-block">
+                    <div class="pump-calc-title" style="color: #991b1b;">Fire Pump Pressure Pressure Sizer</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
+                        <div class="form-group">
+                            <label for="fire-req-top" style="color: #991b1b;">Required Target (psi)</label>
+                            <input type="number" id="fire-req-top" value="65" step="1" onchange="calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label for="fire-target-floor" style="color: #991b1b;">Target Floor Constraint</label>
+                            <select id="fire-target-floor" onchange="calculate()"></select>
+                        </div>
+                    </div>
+                    <div class="pump-calc-value" id="fire-required-boost" style="color: #dc2626;">0.0 psi</div>
                 </div>
             </div>
 
@@ -407,6 +463,43 @@
         return 4.52 * Math.pow(flowGPM, 1.85) / (Math.pow(C, 1.85) * Math.pow(d, 4.87));
     }
 
+    function syncFloorDropdowns() {
+        const domSelect = document.getElementById('dom-target-floor');
+        const fireSelect = document.getElementById('fire-target-floor');
+        
+        const prevDomVal = domSelect.value;
+        const prevFireVal = fireSelect.value;
+        
+        domSelect.innerHTML = '';
+        fireSelect.innerHTML = '';
+        
+        const menuFloors = [...floors].sort((a,b) => getDecimalFeet(b) - getDecimalFeet(a));
+        
+        menuFloors.forEach((f) => {
+            const optDom = document.createElement('option');
+            optDom.value = f.id;
+            optDom.textContent = `${f.name} (${formatFtIn(getDecimalFeet(f))})`;
+            domSelect.appendChild(optDom);
+
+            const optFire = document.createElement('option');
+            optFire.value = f.id;
+            optFire.textContent = `${f.name} (${formatFtIn(getDecimalFeet(f))})`;
+            fireSelect.appendChild(optFire);
+        });
+        
+        if (floors.some(f => f.id == prevDomVal)) {
+            domSelect.value = prevDomVal;
+        } else if (menuFloors.length > 0) {
+            domSelect.value = menuFloors[0].id;
+        }
+        
+        if (floors.some(f => f.id == prevFireVal)) {
+            fireSelect.value = prevFireVal;
+        } else if (menuFloors.length > 0) {
+            fireSelect.value = menuFloors[0].id;
+        }
+    }
+
     function addFloor() {
         const nameInput = document.getElementById('new-floor-name');
         const ftInput = document.getElementById('new-floor-ft');
@@ -425,17 +518,28 @@
         nameInput.value = '';
         ftInput.value = '0';
         inInput.value = '0';
+        
+        syncFloorDropdowns();
         calculate();
     }
 
     function deleteFloor(id) {
+        if (floors.length <= 1) {
+            alert("Must maintain at least one floor reference plane.");
+            return;
+        }
         floors = floors.filter(floor => floor.id !== id);
+        syncFloorDropdowns();
         calculate();
     }
 
-    function updateFloorName(id, val) { const f = floors.find(f => f.id === id); if (f) f.name = val; }
-    function updateFloorFt(id, val) { const f = floors.find(f => f.id === id); if (f) f.ft = parseInt(val, 10) || 0; calculate(); }
-    function updateFloorIn(id, val) { const f = floors.find(f => f.id === id); if (f) f.in = parseInt(val, 10) || 0; calculate(); }
+    function updateFloorName(id, val) { 
+        const f = floors.find(f => f.id === id); 
+        if (f) f.name = val; 
+        syncFloorDropdowns(); 
+    }
+    function updateFloorFt(id, val) { const f = floors.find(f => f.id === id); if (f) f.ft = parseInt(val, 10) || 0; syncFloorDropdowns(); calculate(); }
+    function updateFloorIn(id, val) { const f = floors.find(f => f.id === id); if (f) f.in = parseInt(val, 10) || 0; syncFloorDropdowns(); calculate(); }
     function updateFloorPRV(id, val) { const f = floors.find(f => f.id === id); if (f) f.prv = parseFloat(val) || 0; calculate(); }
 
     function calculate() {
@@ -448,10 +552,10 @@
 
         const streetPressure = parseFloat(document.getElementById('street-pressure').value) || 0;
         
-        // Domestic Master Loss Adjustments
         const domBfp = parseFloat(document.getElementById('dom-bfp').value) || 0;
         const domMisc = parseFloat(document.getElementById('dom-misc').value) || 0;
         const domPump = parseFloat(document.getElementById('dom-pump').value) || 0;
+        const domReqTop = parseFloat(document.getElementById('dom-req-top').value) || 0;
         const baseDomPressure = streetPressure - domBfp - domMisc + domPump;
         
         const domMat = document.getElementById('dom-material').value;
@@ -459,10 +563,10 @@
         const domFlow = parseFloat(document.getElementById('dom-flow').value) || 0;
         const domFrictionFactor = getFrictionLossPerFoot(domMat, domSize, domFlow);
 
-        // Fire Protection Master Loss Adjustments
         const fireBfp = parseFloat(document.getElementById('fire-bfp').value) || 0;
         const fireMisc = parseFloat(document.getElementById('fire-misc').value) || 0;
         const firePump = parseFloat(document.getElementById('fire-pump').value) || 0;
+        const fireReqTop = parseFloat(document.getElementById('fire-req-top').value) || 0;
         const baseFirePressure = streetPressure - fireBfp - fireMisc + firePump;
         
         const fireStopInput = parseFloat(document.getElementById('fire-stop-pressure').value) || 0;
@@ -473,19 +577,12 @@
         const fireFlow = parseFloat(document.getElementById('fire-flow').value) || 0;
         const fireFrictionFactor = getFrictionLossPerFoot(fireMat, fireSize, fireFlow);
 
-        // CORRECTED: Calculate bottom-up cumulative delta heights to stack friction accurately
         const lowestToHighestFloors = [...floors].sort((a, b) => getDecimalFeet(a) - getDecimalFeet(b));
         let cumulativeDomFriction = 0;
         let cumulativeFireFriction = 0;
 
         lowestToHighestFloors.forEach((floor, index) => {
-            let deltaHeight = 0;
-            if (index > 0) {
-                const floorBelow = lowestToHighestFloors[index - 1];
-                deltaHeight = getDecimalFeet(floor) - getDecimalFeet(floorBelow);
-            } else {
-                deltaHeight = getDecimalFeet(floor);
-            }
+            let deltaHeight = index > 0 ? (getDecimalFeet(floor) - getDecimalFeet(lowestToHighestFloors[index - 1])) : getDecimalFeet(floor);
 
             cumulativeDomFriction += deltaHeight * domFrictionFactor;
             cumulativeFireFriction += deltaHeight * fireFrictionFactor;
@@ -494,16 +591,36 @@
 
             floor.totalFrictionText = `Dom: -${cumulativeDomFriction.toFixed(1)}<br>Fire: -${cumulativeFireFriction.toFixed(1)}`;
             
+            floor.calculatedDomFriction = cumulativeDomFriction;
+            floor.calculatedFireFriction = cumulativeFireFriction;
+            
             floor.rawDom = baseDomPressure - headLoss - cumulativeDomFriction;
             floor.rawFire = baseFirePressure - headLoss - cumulativeFireFriction;
             floor.fireStop = baseFireStopPressure - headLoss; 
         });
 
-        // Top-down reference generation for PRV and UI painter
-        const sortedFloors = [...floors].sort((a, b) => getDecimalFeet(b) - getDecimalFeet(a));
-        const topFloorId = sortedFloors.length > 0 ? sortedFloors[0].id : null;
+        const selectedDomId = document.getElementById('dom-target-floor').value;
+        const selectedFireId = document.getElementById('fire-target-floor').value;
+        
+        const targetDomFloor = floors.find(f => f.id == selectedDomId) || lowestToHighestFloors[lowestToHighestFloors.length - 1];
+        const targetFireFloor = floors.find(f => f.id == selectedFireId) || lowestToHighestFloors[lowestToHighestFloors.length - 1];
 
-        // Cascading Pressure Regulator Evaluator Pass
+        if (targetDomFloor) {
+            const targetDomElevation = getDecimalFeet(targetDomFloor);
+            const totalTargetDomLosses = (targetDomElevation * PSI_PER_FOOT) + targetDomFloor.calculatedDomFriction + domBfp + domMisc;
+            const reqMinDomBoost = Math.max(0, (domReqTop + totalTargetDomLosses) - streetPressure);
+            document.getElementById('dom-required-boost').innerText = `Required Min Boost: ${reqMinDomBoost.toFixed(1)} psi`;
+        }
+
+        if (targetFireFloor) {
+            const targetFireElevation = getDecimalFeet(targetFireFloor);
+            const totalTargetFireLosses = (targetFireElevation * PSI_PER_FOOT) + targetFireFloor.calculatedFireFriction + fireBfp + fireMisc;
+            const reqMinFireBoost = Math.max(0, (fireReqTop + totalTargetFireLosses) - streetPressure);
+            document.getElementById('fire-required-boost').innerText = `Required Min Boost: ${reqMinFireBoost.toFixed(1)} psi`;
+        }
+
+        const sortedFloors = [...floors].sort((a, b) => getDecimalFeet(b) - getDecimalFeet(a));
+
         let runningPRVLimit = Infinity;
         let activePrvFloorName = "";
 
@@ -534,7 +651,6 @@
             }
         }
 
-        // Table Elements Painter Loop
         const tbody = document.getElementById('floor-table-body');
         tbody.innerHTML = '';
 
@@ -555,7 +671,8 @@
 
             let rawDomClass = (floor.rawDom < 30 || floor.rawDom > 85) ? 'pressure-warn' : 'pressure-normal';
             let postDomClass = (floor.postDom < 30 || floor.postDom > 85) ? 'pressure-warn' : 'pressure-normal';
-            let fireClass = (floor.id === topFloorId && floor.rawFire < 65) ? 'pressure-crit' : 'pressure-normal';
+            
+            let fireClass = (floor.id == selectedFireId && floor.rawFire < fireReqTop) ? 'pressure-crit' : 'pressure-normal';
             let fireStopClass = (floor.fireStop > 175) ? 'pressure-warn' : 'pressure-normal';
 
             const row = document.createElement('tr');
@@ -584,6 +701,7 @@
         });
     }
 
+    syncFloorDropdowns();
     calculate();
 </script>
 </body>
