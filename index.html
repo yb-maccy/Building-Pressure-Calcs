@@ -26,7 +26,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
         }
 
@@ -89,6 +89,11 @@
             font-size: 1rem;
         }
 
+        .table-input {
+            padding: 4px 6px;
+            font-size: 0.9rem;
+        }
+
         button {
             background-color: var(--primary);
             color: white;
@@ -101,10 +106,8 @@
         }
 
         button:hover { background-color: #1d4ed8; }
-        button.btn-danger { background-color: var(--danger); }
+        button.btn-danger { background-color: var(--danger); padding: 4px 8px; font-size: 0.85rem; }
         button.btn-danger:hover { background-color: #b91c1c; }
-        button.btn-secondary { background-color: #64748b; }
-        button.btn-secondary:hover { background-color: #475569; }
 
         table {
             width: 100%;
@@ -118,18 +121,13 @@
             border-bottom: 1px solid var(--border);
         }
 
-        th { background-color: #f1f5f9; font-weight: 600; }
+        th { background-color: #f1f5f9; font-weight: 600; font-size: 0.9rem; }
 
         /* Pressure Color Rules */
         .pressure-normal { color: var(--success); font-weight: bold; }
         .pressure-warn { color: var(--warning); font-weight: bold; }
         .pressure-crit { color: var(--danger); font-weight: bold; }
 
-        .floor-row-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
         .floor-input-group {
             display: flex;
             gap: 10px;
@@ -139,6 +137,22 @@
             padding: 10px;
             border-radius: 6px;
         }
+
+        .delta-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .prv-badge {
+            font-size: 0.75rem;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -146,12 +160,12 @@
 <div class="container">
     <header>
         <h1>Water Pressure & Elevation Calculator</h1>
-        <p style="margin: 4px 0 0 0; color: #64748b;">Calculates pressure drops/gains based on gravity ($1\text{ ft} \approx 0.433\text{ psi}$). Ensure floor elevations are relative to the incoming water main level ($0\text{ ft}$).</p>
+        <p style="margin: 4px 0 0 0; color: #64748b;">Calculates structural drops/gains ($1\text{ ft} \approx 0.433\text{ psi}$). Domestic PRVs cascade structural limits to all lower floors.</p>
     </header>
 
     <div class="grid">
         <div class="card full-width">
-            <div class="card-title">Main Supply & Source Inputs</div>
+            <div class="card-title">Main Supply Inputs</div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <div class="form-group">
                     <label for="street-pressure">Street Main Pressure (psi)</label>
@@ -170,7 +184,7 @@
                 <label for="dom-pump">Booster Pump Gain (psi)</label>
                 <input type="number" id="dom-pump" value="45" step="0.1" oninput="calculate()">
             </div>
-            <p style="font-size: 0.8rem; color: #64748b;">Limits: Target 30 psi to 85 psi. Out of bounds highlights <span style="color: var(--warning); font-weight:bold;">Orange</span>.</p>
+            <p style="font-size: 0.8rem; color: #64748b;">Limits: Normal bounds are 30–85 psi. Out-of-bounds displays <span style="color: var(--warning); font-weight:bold;">Orange</span>.</p>
         </div>
 
         <div class="card">
@@ -187,16 +201,16 @@
         </div>
 
         <div class="card full-width">
-            <div class="card-title">Floors & Elevation Management</div>
+            <div class="card-title">Floors, Elevations & PRV Config</div>
             
             <div class="floor-input-group">
                 <div style="flex: 2;">
                     <label>Floor Name</label>
-                    <input type="text" id="new-floor-name" placeholder="e.g., Roof, Floor 1">
+                    <input type="text" id="new-floor-name" placeholder="e.g., Floor 5">
                 </div>
                 <div style="flex: 1;">
                     <label>Elevation Above Main (ft)</label>
-                    <input type="number" id="new-floor-elevation" placeholder="e.g., 45" step="0.1">
+                    <input type="number" id="new-floor-elevation" placeholder="e.g., 60" step="0.1">
                 </div>
                 <button type="button" onclick="addFloor()">Add Floor</button>
             </div>
@@ -206,8 +220,11 @@
                     <tr>
                         <th>Floor Name</th>
                         <th>Elevation (ft)</th>
-                        <th>Domestic Pressure</th>
-                        <th>Fire Pressure</th>
+                        <th>Height Diff ($\Delta$ ft)</th>
+                        <th>Domestic System (Raw)</th>
+                        <th>Domestic PRV Max Limit (psi)</th>
+                        <th>Domestic System (Post-PRV)</th>
+                        <th>Fire System Pressure</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -219,13 +236,13 @@
 </div>
 
 <script>
-    // Initial floor data setup
+    // Managed data array
     let floors = [
-        { id: 1, name: 'Floor 1', elevation: 0 },
-        { id: 2, name: 'Floor 2', elevation: 12 },
-        { id: 3, name: 'Floor 3', elevation: 24 },
-        { id: 4, name: 'Floor 4', elevation: 36 },
-        { id: 5, name: 'Roof', elevation: 48 }
+        { id: 1, name: 'Floor 1', elevation: 0, prv: 0 },
+        { id: 2, name: 'Floor 2', elevation: 12, prv: 0 },
+        { id: 3, name: 'Floor 3', elevation: 24, prv: 0 },
+        { id: 4, name: 'Floor 4', elevation: 36, prv: 0 },
+        { id: 5, name: 'Roof', elevation: 48, prv: 0 }
     ];
     let nextId = 6;
     const PSI_PER_FOOT = 0.433;
@@ -238,16 +255,13 @@
         const elevation = parseFloat(elevInput.value);
 
         if (!name || isNaN(elevation)) {
-            alert('Please enter a valid Floor Name and Elevation value.');
+            alert('Please check Floor Name and Elevation fields.');
             return;
         }
 
-        floors.push({ id: nextId++, name: name, elevation: elevation });
-        
-        // Clear input form fields
+        floors.push({ id: nextId++, name: name, elevation: elevation, prv: 0 });
         nameInput.value = '';
         elevInput.value = '';
-        
         calculate();
     }
 
@@ -256,75 +270,141 @@
         calculate();
     }
 
-    function updateFloorName(id, newName) {
+    function updateFloorName(id, val) {
         const floor = floors.find(f => f.id === id);
-        if (floor) floor.name = newName;
-        // recalculate to capture potential changes to what the "topmost floor" is by name context
-        calculate(); 
+        if (floor) floor.name = val;
     }
 
-    function updateFloorElevation(id, newElevation) {
+    function updateFloorElevation(id, val) {
         const floor = floors.find(f => f.id === id);
-        if (floor) floor.elevation = parseFloat(newElevation) || 0;
+        if (floor) floor.elevation = parseFloat(val) || 0;
+        calculate();
+    }
+
+    function updateFloorPRV(id, val) {
+        const floor = floors.find(f => f.id === id);
+        if (floor) floor.prv = parseFloat(val) || 0;
         calculate();
     }
 
     function calculate() {
         const streetPressure = parseFloat(document.getElementById('street-pressure').value) || 0;
         
-        // Domestic variables
+        // Base pressures directly out of the mechanical room
         const domBfp = parseFloat(document.getElementById('dom-bfp').value) || 0;
         const domPump = parseFloat(document.getElementById('dom-pump').value) || 0;
         const baseDomPressure = streetPressure - domBfp + domPump;
 
-        // Fire variables
         const fireBfp = parseFloat(document.getElementById('fire-bfp').value) || 0;
         const firePump = parseFloat(document.getElementById('fire-pump').value) || 0;
         const baseFirePressure = streetPressure - fireBfp + firePump;
 
-        // Sort floors by elevation to determine the true top floor
+        // Sort descending (Highest elevation at index 0)
         const sortedFloors = [...floors].sort((a, b) => b.elevation - a.elevation);
         const topFloorId = sortedFloors.length > 0 ? sortedFloors[0].id : null;
 
+        // Step 1: Precompute RAW profiles
+        sortedFloors.forEach(floor => {
+            const headLoss = floor.elevation * PSI_PER_FOOT;
+            floor.rawDom = baseDomPressure - headLoss;
+            floor.rawFire = baseFirePressure - headLoss;
+        });
+
+        // Step 2: Compute cascading PRVs moving from top to bottom
+        // A PRV sets a maximum pressure threshold that restricts downstream lines (lower floors)
+        let runningPRVLimit = Infinity;
+        let activePrvFloorName = "";
+
+        // To cascade correctly downstream, we process from highest elevation down to lowest
+        for (let i = 0; i < sortedFloors.length; i++) {
+            let current = sortedFloors[i];
+            
+            // If a PRV is active on this floor, update our cascading tracking ceiling
+            if (current.prv > 0) {
+                runningPRVLimit = current.prv;
+                activePrvFloorName = current.name;
+                current.postDom = Math.min(current.rawDom, current.prv);
+                current.prvApplied = false; // It's originating here
+            } else {
+                // No PRV explicitly set on this floor. Check if a restriction is cascading from above.
+                if (runningPRVLimit !== Infinity) {
+                    // Calculate what the pressure restriction looks like after losing elevation gain
+                    // (As water travels down from the PRV floor, it GAINS pressure due to gravity)
+                    let elevationDroppingFromPrvSource = 0;
+                    const sourceFloor = sortedFloors.find(f => f.name === activePrvFloorName);
+                    if (sourceFloor) {
+                        elevationDroppingFromPrvSource = sourceFloor.elevation - current.elevation;
+                    }
+                    
+                    let cascadedMaxAllowedPressure = runningPRVLimit + (elevationDroppingFromPrvSource * PSI_PER_FOOT);
+                    
+                    if (current.rawDom > cascadedMaxAllowedPressure) {
+                        current.postDom = cascadedMaxAllowedPressure;
+                        current.prvApplied = true; // Flag to show user it's altered by a higher valve
+                    } else {
+                        current.postDom = current.rawDom;
+                        current.prvApplied = false;
+                    }
+                } else {
+                    current.postDom = current.rawDom;
+                    current.prvApplied = false;
+                }
+            }
+        }
+
+        // Render pass
         const tbody = document.getElementById('floor-table-body');
         tbody.innerHTML = '';
 
-        // Render rows based on original array index or sorting preference. 
-        // Showing highest floor on top mirrors physical building layouts.
-        sortedFloors.forEach(floor => {
-            const headLoss = floor.elevation * PSI_PER_FOOT;
-            
-            const domesticPressure = baseDomPressure - headLoss;
-            const firePressure = baseFirePressure - headLoss;
+        sortedFloors.forEach((floor, index) => {
+            // Compute structural delta to the floor beneath it
+            let deltaText = "-";
+            if (index < sortedFloors.length - 1) {
+                let lowerFloor = sortedFloors[index + 1];
+                let diff = floor.elevation - lowerFloor.elevation;
+                deltaText = `+${diff.toFixed(1)} ft to ${lowerFloor.name}`;
+            } else if (sortedFloors.length > 1) {
+                deltaText = "Base Level";
+            }
 
-            // Domestic Class Rules: below 30 or above 85 -> warning color
+            // Domestic Styling Rules (on the Post-PRV values)
             let domClass = 'pressure-normal';
-            if (domesticPressure < 30 || domesticPressure > 85) {
+            if (floor.postDom < 30 || floor.postDom > 85) {
                 domClass = 'pressure-warn';
             }
 
-            // Fire Class Rules: above 175 -> warning color. Top floor below 65 -> critical color.
+            // Fire Styling Rules
             let fireClass = 'pressure-normal';
-            if (firePressure > 175) {
+            if (floor.rawFire > 175) {
                 fireClass = 'pressure-warn';
             }
-            if (floor.id === topFloorId && firePressure < 65) {
+            if (floor.id === topFloorId && floor.rawFire < 65) {
                 fireClass = 'pressure-crit';
             }
 
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>
-                    <input type="text" value="${floor.name}" oninput="updateFloorName(${floor.id}, this.value)">
+                    <input type="text" class="table-input" value="${floor.name}" oninput="updateFloorName(${floor.id}, this.value)">
                 </td>
                 <td>
-                    <input type="number" value="${floor.elevation}" step="0.1" oninput="updateFloorElevation(${floor.id}, this.value)">
+                    <input type="number" class="table-input" value="${floor.elevation}" step="0.1" oninput="updateFloorElevation(${floor.id}, this.value)">
                 </td>
                 <td>
-                    <span class="${domClass}">${domesticPressure.toFixed(1)} psi</span>
+                    <span class="delta-text">${deltaText}</span>
                 </td>
                 <td>
-                    <span class="${fireClass}">${firePressure.toFixed(1)} psi</span>
+                    <span>${floor.rawDom.toFixed(1)} psi</span>
+                </td>
+                <td>
+                    <input type="number" class="table-input" value="${floor.prv || ''}" placeholder="None" step="1" oninput="updateFloorPRV(${floor.id}, this.value)">
+                </td>
+                <td>
+                    <span class="${domClass}">${floor.postDom.toFixed(1)} psi</span>
+                    ${floor.prvApplied ? '<br><span class="prv-badge">Regulated from above</span>' : ''}
+                </td>
+                <td>
+                    <span class="${fireClass}">${floor.rawFire.toFixed(1)} psi</span>
                 </td>
                 <td>
                     <button class="btn-danger" onclick="deleteFloor(${floor.id})">Delete</button>
@@ -334,7 +414,7 @@
         });
     }
 
-    // Run calculation on initial load
+    // Initialize layout
     calculate();
 </script>
 
