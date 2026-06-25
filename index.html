@@ -3,125 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hydrostatic Building Pressure Analyzer</title>
+    <title>Water Pressure & Elevation Calculator</title>
     <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 20px;
-            background-color: #f4f6f9;
-            display: flex;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        h1 { margin: 0; color: #1e3a8a; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 20px;
-            height: 92vh;
         }
-        #control-panel {
-            width: 380px;
-            background: white;
-            padding: 20px;
+
+        @media (min-width: 768px) {
+            .grid { grid-template-columns: 1fr 1fr; }
+            .full-width { grid-column: span 2; }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            overflow-y: auto;
-        }
-        #visualizer {
-            flex-grow: 1;
-            background: white;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .domestic-title { color: #0284c7; }
+        .fire-title { color: #b91c1c; }
+
         .form-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 5px;
+            margin-bottom: 12px;
         }
-        .height-inputs {
-            display: flex;
-            gap: 5px;
-            align-items: center;
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 4px;
         }
-        input, select, button {
-            padding: 6px;
-            border: 1px solid #ccc;
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
             border-radius: 4px;
-            font-size: 14px;
+            box-sizing: border-box;
+            font-size: 1rem;
         }
-        input[type="number"] {
-            width: 70px;
-        }
+
         button {
-            background-color: #2980b9;
+            background-color: var(--primary);
             color: white;
             border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: #1d4ed8; }
+        button.btn-danger { background-color: var(--danger); }
+        button.btn-danger:hover { background-color: #b91c1c; }
+        button.btn-secondary { background-color: #64748b; }
+        button.btn-secondary:hover { background-color: #475569; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        th, td {
             padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
         }
-        button:hover { background-color: #2471a3; }
-        .btn-danger {
-            background-color: #e74c3c;
+
+        th { background-color: #f1f5f9; font-weight: 600; }
+
+        /* Pressure Color Rules */
+        .pressure-normal { color: var(--success); font-weight: bold; }
+        .pressure-warn { color: var(--warning); font-weight: bold; }
+        .pressure-crit { color: var(--danger); font-weight: bold; }
+
+        .floor-row-actions {
+            display: flex;
+            gap: 8px;
         }
-        .btn-danger:hover { background-color: #c0392b; }
         
-        /* Blueprint Graphic Engine Layout */
-        .floor-box {
-            width: 360px;
-            padding: 15px;
-            margin: 8px 0;
+        .floor-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            background: #f1f5f9;
+            padding: 10px;
             border-radius: 6px;
-            border: 2px solid;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-        }
-        .floor-actions {
-            position: absolute;
-            top: -12px;
-            left: 10px;
-            display: flex;
-            gap: 5px;
-        }
-        .mini-btn {
-            padding: 2px 6px;
-            font-size: 10px;
-            border-radius: 3px;
-        }
-        .safe { background-color: #d4edda; border-color: #28a745; color: #155724; }
-        .low { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
-        .high { background-color: #fff3cd; border-color: #ffc107; color: #856404; }
-        .riser {
-            width: 4px;
-            height: 16px;
-            background-color: #7f8c8d;
         }
     </style>
 </head>
 <body>
 
-    <div id="control-panel">
-        <h2>System Config</h2>
-        <div class="form-group">
-            <label>Supply PSI:</label>
-            <input type="number" id="incoming-psi" value="65" oninput="simulate()">
+<div class="container">
+    <header>
+        <h1>Water Pressure & Elevation Calculator</h1>
+        <p style="margin: 4px 0 0 0; color: #64748b;">Calculates pressure drops/gains based on gravity ($1\text{ ft} \approx 0.433\text{ psi}$). Ensure floor elevations are relative to the incoming water main level ($0\text{ ft}$).</p>
+    </header>
+
+    <div class="grid">
+        <div class="card full-width">
+            <div class="card-title">Main Supply & Source Inputs</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div class="form-group">
+                    <label for="street-pressure">Street Main Pressure (psi)</label>
+                    <input type="number" id="street-pressure" value="60" step="0.1" oninput="calculate()">
+                </div>
+            </div>
         </div>
-        <hr style="width:100%">
+
+        <div class="card">
+            <div class="card-title domestic-title">Domestic Water Controls</div>
+            <div class="form-group">
+                <label for="dom-bfp">Backflow Preventer Loss (psi)</label>
+                <input type="number" id="dom-bfp" value="10" step="0.1" oninput="calculate()">
+            </div>
+            <div class="form-group">
+                <label for="dom-pump">Booster Pump Gain (psi)</label>
+                <input type="number" id="dom-pump" value="45" step="0.1" oninput="calculate()">
+            </div>
+            <p style="font-size: 0.8rem; color: #64748b;">Limits: Target 30 psi to 85 psi. Out of bounds highlights <span style="color: var(--warning); font-weight:bold;">Orange</span>.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title fire-title">Fire Water Controls</div>
+            <div class="form-group">
+                <label for="fire-bfp">Backflow Preventer Loss (psi)</label>
+                <input type="number" id="fire-bfp" value="12" step="0.1" oninput="calculate()">
+            </div>
+            <div class="form-group">
+                <label for="fire-pump">Fire Pump Gain (psi)</label>
+                <input type="number" id="fire-pump" value="120" step="0.1" oninput="calculate()">
+            </div>
+            <p style="font-size: 0.8rem; color: #64748b;">Limits: Over 175 psi highlights <span style="color: var(--warning); font-weight:bold;">Orange</span>. Top floor under 65 psi highlights <span style="color: var(--danger); font-weight:bold;">Red</span>.</p>
+        </div>
+
+        <div class="card full-width">
+            <div class="card-title">Floors & Elevation Management</div>
+            
+            <div class="floor-input-group">
+                <div style="flex: 2;">
+                    <label>Floor Name</label>
+                    <input type="text" id="new-floor-name" placeholder="e.g., Roof, Floor 4">
+                </div>
+                <div style="flex: 1;">
+                    <label>Elevation Above Main (ft)</label>
+                    <input type="number" id="new-floor-elevation" placeholder="e.g., 45" step="0.1">
+                </div>
+                <button type="button" onclick="addFloor()">Add Floor</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Floor Name</th>
+                        <th>Elevation (ft)</th>
+                        <th>Domestic Pressure</th>
+                        <th>Fire Pressure</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="floor-table-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initial floor data setup
+    let floors = [
+        { id: 1, name: 'Floor 1', elevation: 0 },
+        { id: 2, name: 'Floor 2', elevation: 12 },
+        { id: 3, name: 'Floor 3', elevation: 24 },
+        { id: 4, name: 'Floor 4', elevation: 36 },
+        { id: 5, name: 'Roof', elevation: 48 }
+    ];
+    let nextId = 6;
+    const PSI_PER_FOOT = 0.433;
+
+    function addFloor() {
+        const nameInput = document.getElementById('new-floor-name');
+        const elevInput = document.getElementById('new-floor-elevation');
         
-        <h3>Add / Modify Floor</h3>
-        <div class="form-group">
-            <label>Floor Number:</label>
-            <input type="number" id="floor-num" value="1">
-        </div>
-        <div class="form-group">
-            <label>Custom Name (Optional):</label>
-            <input type="text" id="floor-name" placeholder="e.g., Penthouse, Lobby" style="width: 150px;">
-        </div>
-        <div class="form-group">
-            <label>Floor Height:</label>
+        const name = nameInput.value.trim();
+        const elevation = parseFloat(elevInput.value);
+
+        if (!name || isNaN(elevation)) {
+            alert('Please enter a valid Floor Name and Elevation value.');
+            return;
+        }
+
+        floors.push({ id: nextId++, name: name, elevation: elevation });
+        
+        // Clear input form fields
+        nameInput.value = '';
+        elevInput.value = '';
+        
+        calculate();
+    }
+
+    function deleteFloor(id) {
+        floors = floors.filter(floor => floor.id !== id);
+        calculate();
+    }
+
+    function updateFloorName(id, newName) {
+        const floor = floors.find(f => f.id === id);
+        if (floor) floor.name = newName;
+        // recalculate to capture potential changes to what the "topmost floor" is by name context
+        calculate(); 
+    }
+
+    function updateFloorElevation(id, newElevation) {
+        const floor = floors.find(f => f.id === id);
+        if (floor) floor.elevation = parseFloat(newElevation) || 0;
+        calculate();
+    }
+
+    function calculate() {
+        const streetPressure = parseFloat(document.getElementById('street-pressure').value) || 0;
+        
+        // Domestic variables
+        const domBfp = parseFloat(document.getElementById('dom-bfp').value) || 0;
+        const domPump = parseFloat(document.getElementById('dom-pump').value) || 0;
+        const baseDomPressure = streetPressure - domBfp + domPump;
+
+        // Fire variables
+        const fireBfp = parseFloat(document.getElementById('fire-bfp').value) || 0;
+        const firePump = parseFloat(document.getElementById('fire-pump').value) || 0;
+        const baseFirePressure = streetPressure - fireBfp + firePump;
+
+        // Sort floors by elevation to determine the true top floor
+        const sortedFloors = [...floors].sort((a, b) => b.elevation - a.elevation);
+        const topFloorId = sortedFloors.length > 0 ? sortedFloors[0].id : null;
+
+        const tbody = document.getElementById('floor-table-body');
+        tbody.innerHTML = '';
+
+        // Render rows based on original array index or sorting preference. 
+        // Showing highest floor on top mirrors physical building layouts.
+        sortedFloors.forEach(floor => {
+            const headLoss = floor.elevation * PSI_PER_FOOT;
+            
+            const domesticPressure = baseDomPressure - headLoss;
+            const firePressure = baseFirePressure - headLoss;
+
+            // Domestic Class Rules: below 30 or above 85 -> warning color
+            let domClass = 'pressure-normal';
+            if (domesticPressure < 30 || domesticPressure > 85) {
+                domClass = 'pressure-warn';
+            }
+
+            // Fire Class Rules: above 175 -> warning color. Top floor below 65 -> critical color.
+            let fireClass = 'pressure-normal';
+            if (firePressure > 175) {
+                fireClass = 'pressure-warn';
+            }
+            if (floor.id === topFloorId && firePressure < 65) {
+                fireClass = 'pressure-crit';
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <input type="text" value="${floor.name}" oninput="updateFloorName(${floor.id}, this.value)">
+                </td>
+                <td>
+                    <input type="number" value="${floor.elevation}" step="0.1" oninput="updateFloorElevation(${floor.id}, this.value)">
+                </td>
+                <td>
+                    <span class="${domClass}">${domesticPressure.toFixed(1)} psi</span>
+                </td>
+                <td>
+                    <span class="${fireClass}">${firePressure.toFixed(1)} psi</span>
+                </td>
+                <td>
+                    <button class="btn-danger" onclick="deleteFloor(${floor.id})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // Run calculation on initial load
+    calculate();
+</script>
+
+</body>
+</html>
