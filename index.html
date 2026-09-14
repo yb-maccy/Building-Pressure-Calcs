@@ -227,7 +227,15 @@
         input[type="number"].no-spinner {
             -moz-appearance: textfield;
         }
-    @media print {
+@media print {
+  @page {
+            size: landscape; /* Switches the page layout to horizontal for more width */
+            margin: 10mm;    /* Controls the print margins to maximize usable space */
+        }
+        body {
+            width: 100% !important;
+            max-width: none !important;
+        }
         input[type="text"],
         input[type="number"],
         textarea {
@@ -235,8 +243,8 @@
             max-width: none !important;
             box-sizing: border-box !important;
             flex-shrink: 0 !important;
-  }
-}
+        }
+    }
     </style>
 </head>
 <body>
