@@ -216,6 +216,14 @@
             padding-top: 8px;
             border-top: 1px solid rgba(0,0,0,0.06);
         }
+        input[type="number"].no-spinner::-webkit-outer-spin-button,
+        input[type="number"].no-spinner::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"].no-spinner {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
@@ -237,7 +245,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                     <div class="form-group">
                         <label for="street-pressure">Street Main Residual Pressure (psi)</label>
-                        <input type="number" id="street-pressure" value="50" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="street-pressure" value="50" onchange="calculate()">
                     </div>
                 </div>
             </div>
@@ -249,15 +257,15 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div class="form-group">
                         <label for="dom-bfp">Backflow Preventer Loss (psi)</label>
-                        <input type="number" id="dom-bfp" value="10" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="dom-bfp" value="10" onchange="calculate()">
                     </div>
                     <div class="form-group">
                         <label for="dom-misc">Misc Component Losses (psi)</label>
-                        <input type="number" id="dom-misc" value="0" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="dom-misc" value="0" onchange="calculate()">
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
                         <label for="dom-pump">Booster Pump Current Gain (psi)</label>
-                        <input type="number" id="dom-pump" value="50" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="dom-pump" value="50" onchange="calculate()">
                     </div>
                 </div>
                 
@@ -289,7 +297,7 @@
                     </div>
                     <div>
                         <label style="font-size:0.75rem;">Design Flow (GPM)</label>
-                        <input type="number" id="dom-flow" value="125" step="1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="dom-flow" value="125" onchange="calculate()">
                     </div>
                 </div>
 
@@ -298,7 +306,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
                         <div class="form-group">
                             <label for="dom-req-top" style="color: #166534;">Required Target (psi)</label>
-                            <input type="number" id="dom-req-top" value="30" step="1" onchange="calculate()">
+                            <input type="number" class="no-spinner" id="dom-req-top" value="30" onchange="calculate()">
                         </div>
                         <div class="form-group">
                             <label for="dom-target-floor" style="color: #166534;">Target Floor Constraint</label>
@@ -316,19 +324,19 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div class="form-group">
                         <label for="fire-bfp">Backflow Preventer Loss (psi)</label>
-                        <input type="number" id="fire-bfp" value="12" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="fire-bfp" value="12" onchange="calculate()">
                     </div>
                     <div class="form-group">
                         <label for="fire-misc">Misc Fitting Losses (psi)</label>
-                        <input type="number" id="fire-misc" value="0" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="fire-misc" value="0" onchange="calculate()">
                     </div>
                     <div class="form-group">
                         <label for="fire-pump">Fire Pump Current Boost (psi)</label>
-                        <input type="number" id="fire-pump" value="150" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="fire-pump" value="150" onchange="calculate()">
                     </div>
                     <div class="form-group">
                         <label for="fire-stop-pressure">Fire Pump Stop (psi)</label>
-                        <input type="number" id="fire-stop-pressure" value="175" step="0.1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="fire-stop-pressure" value="175" onchange="calculate()">
                     </div>
                 </div>
 
@@ -358,7 +366,7 @@
                     </div>
                     <div>
                         <label style="font-size:0.75rem;">Design Flow (GPM)</label>
-                        <input type="number" id="fire-flow" value="500" step="1" onchange="calculate()">
+                        <input type="number" class="no-spinner" id="fire-flow" value="500" onchange="calculate()">
                     </div>
                 </div>
 
@@ -367,7 +375,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
                         <div class="form-group">
                             <label for="fire-req-top" style="color: #991b1b;">Required Target (psi)</label>
-                            <input type="number" id="fire-req-top" value="65" step="1" onchange="calculate()">
+                            <input type="number" class="no-spinner" id="fire-req-top" value="65" onchange="calculate()">
                         </div>
                         <div class="form-group">
                             <label for="fire-target-floor" style="color: #991b1b;">Target Floor Constraint</label>
@@ -391,11 +399,11 @@
                     </div>
                     <div style="flex: 1;">
                         <label>Elevation (Feet)</label>
-                        <input type="number" id="new-floor-ft" value="0" step="1">
+                        <input type="number" class="no-spinner" id="new-floor-ft" value="0">
                     </div>
                     <div style="flex: 1;">
                         <label>Elevation (Inches)</label>
-                        <input type="number" id="new-floor-in" value="0" min="0" step="1">
+                        <input type="number" class="no-spinner" id="new-floor-in" value="0" min="0">
                     </div>
                     <button type="button" onclick="addFloor()">Add Floor</button>
                 </div>
