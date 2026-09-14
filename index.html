@@ -227,6 +227,16 @@
         input[type="number"].no-spinner {
             -moz-appearance: textfield;
         }
+    @media print {
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100% !important;
+            max-width: none !important;
+            box-sizing: border-box !important;
+            flex-shrink: 0 !important;
+  }
+}
     </style>
 </head>
 <body>
